@@ -26,5 +26,4 @@ replay_pid*
 # mod and project files
 /.settings/
 /.git/
-/mod/
 /test/
