@@ -183,11 +183,118 @@ public class TerrorZoneHandler {
 		}
 		this.desecrateMonsters(selection.getMonsters(), charlevel);
 		this.adjustAreaLevels(selection.getLevelLines(), charlevel);
-		this.handleSpecialCases(selection.getSpecialCases(), selection.getMonsters(), charlevel);
+		this.handleSpecialMonsters(selection.getSpecialCases(), selection.getMonsters(), charlevel);
 	}
 
-	private void handleSpecialCases(SpecialHandlingEntry[] specialCases, String[] strings, int charlevel) {
-		for (SpecialHandlingEntry entry : specialCases) {
+	private void handleSpecialMonsters(SpecialMonster[] specialMonsters, String[] areaMonsters, int charlevel) {
+		for (SpecialMonster specialMonster : specialMonsters) {
+			if (this.superuniquesLookup.containsKey(specialMonster.toString())) {
+				int superuniqueIndex = this.superuniquesLookup.get(specialMonster.toString());
+				String[] superuniqueLines = this.superuniques.get(superuniqueIndex);
+				if (this.monsterIsBoss(superuniqueLines[2])) {
+					superuniqueLines[1] += "Terror";
+					if (!this.isStringInArray(superuniqueLines[2], areaMonsters)) {
+						this.desecrateMonster(superuniqueLines[2], charlevel);
+					}
+					this.setBossTC(specialMonster, superuniqueLines[2], charlevel);
+					continue;
+				}
+				switch (specialMonster) {
+				case ISMAIL:
+				case BREMM:
+					this.adjustCouncilTC();
+				default:
+					if (!this.isStringInArray(superuniqueLines[2], areaMonsters)) {
+						this.desecrateMonster(superuniqueLines[2], charlevel);
+					}
+					superuniqueLines[1] += "Terror";
+					if (specialMonster.hasSpecialTC()) {
+						String tcSuffix = " Desecrated";
+						if (specialMonster != SpecialMonster.NIHLATHAK) {
+							tcSuffix += " A";
+						}
+						superuniqueLines[17] += tcSuffix;
+						superuniqueLines[18] += tcSuffix;
+						superuniqueLines[19] += tcSuffix;
+					}
+				}
+			} else {
+				this.desecrateMonster(specialMonster.toString(), charlevel);
+				this.setBossTC(specialMonster, specialMonster.toString(), charlevel);
+			}
+		}
+	}
+
+	private void setBossTC(SpecialMonster boss, String monsterID, int charlevel) {
+		switch (boss) {
+		case ANDARIEL:
+		case BAAL:
+		case BLOODRAVEN:
+		case DIABLO:
+		case DURIEL:
+		case IZUAL:
+		case MEPHISTO:
+		case SUMMONER:
+			String[] monsterLines = monsters.get(monstersLookup.get(monsterID));
+			monsterLines[236] += this.getBossTCSuffix(boss, 0, charlevel + 5);
+			monsterLines[237] = monsterLines[236];
+			monsterLines[238] = monsterLines[236];
+			monsterLines[239] = monsterLines[236];
+			monsterLines[240] += this.getBossTCSuffix(boss, 1, charlevel + 5);
+			monsterLines[241] = monsterLines[240];
+			monsterLines[242] = monsterLines[240];
+			monsterLines[243] = monsterLines[240];
+			monsterLines[244] += this.getBossTCSuffix(boss, 2, charlevel + 5);
+			monsterLines[245] = monsterLines[244];
+			monsterLines[246] = monsterLines[244];
+			monsterLines[247] = monsterLines[244];
+			break;
+		case GRISWOLD:
+		case NIHLATHAK:
+		case RADAMENT:
+			String[] superuniqueLines = superuniques.get(superuniquesLookup.get(boss.toString()));
+			superuniqueLines[17] += this.getBossTCSuffix(boss, 0, charlevel + 5);
+			superuniqueLines[18] += this.getBossTCSuffix(boss, 1, charlevel + 5);
+			superuniqueLines[19] += this.getBossTCSuffix(boss, 2, charlevel + 5);
+			break;
+		default:
+			System.err.println("default case for setBossTC should never happen! Boss: " + boss.toString());
+		}
+	}
+
+	private String getBossTCSuffix(SpecialMonster boss, int difficulty, int bosslevel) {
+		switch (boss) {
+		case SUMMONER:
+			return this.getSummonerTCSuffix(difficulty, bosslevel);
+		case RADAMENT:
+			return this.getRadamentTCSuffix(difficulty, bosslevel);
+		case GRISWOLD:
+			return this.getGriswoldTCSuffix(difficulty, bosslevel);
+		case BLOODRAVEN:
+			return this.getBloodRavenTCSuffix(difficulty, bosslevel);
+		case ANDARIEL:
+			return this.getAndarielTCSuffix(difficulty, bosslevel);
+		case DURIEL:
+			return this.getDurielTCSuffix(difficulty, bosslevel);
+		case MEPHISTO:
+			return this.getMephistoTCSuffix(difficulty, bosslevel);
+		case DIABLO:
+			return this.getDiabloTCSuffix(difficulty, bosslevel);
+		case IZUAL:
+			return this.getIzualTCSuffic(difficulty, bosslevel);
+		default:
+			return " Desecrated";
+		}
+	}
+
+	private boolean monsterIsBoss(String monsterID) {
+		String[] monsterLines = monsters.get(monstersLookup.get(monsterID));
+		return !monsterLines[87].isEmpty();
+	}
+
+	@Deprecated
+	private void handleSpecialCases(SpecialMonster[] specialCases, String[] strings, int charlevel) {
+		for (SpecialMonster entry : specialCases) {
 			if (this.superuniquesLookup.containsKey(entry.toString())) {
 				// we can change it in superuniques
 				int superuniqueIndex = this.superuniquesLookup.get(entry.toString());
@@ -204,10 +311,10 @@ public class TerrorZoneHandler {
 					continue;
 				}
 				// change the tc if it has a special one
-				if (entry.isMoreWork()) {
+				if (entry.hasSpecialTC()) {
 					String tcSuffix = " Desecrated";
 					// Nihla has no ' A' suffix because of high level
-					if (!(entry == SpecialHandlingEntry.NIHLATHAK)) {
+					if (!(entry == SpecialMonster.NIHLATHAK)) {
 						tcSuffix += " A";
 					}
 					superuniqueLines[17] += tcSuffix;
@@ -229,8 +336,9 @@ public class TerrorZoneHandler {
 			}
 		}
 	}
-
-	private void changeTCForSnowflakes(SpecialHandlingEntry entry, int charlevel) {
+	
+	@Deprecated
+	private void changeTCForSnowflakes(SpecialMonster entry, int charlevel) {
 		switch (entry) {
 		case GRISWOLD:
 		case RADAMENT:
@@ -254,8 +362,9 @@ public class TerrorZoneHandler {
 		}
 
 	}
-
-	private String getMonstatsTCSuffix(SpecialHandlingEntry entry, int charlevel, int index) {
+	
+	@Deprecated
+	private String getMonstatsTCSuffix(SpecialMonster entry, int charlevel, int index) {
 		int bosslevel = charlevel + 5;
 		int difficulty = 1;
 		if (index > 243) {
@@ -608,12 +717,12 @@ public class TerrorZoneHandler {
 			if (!first[index].contains("Desecrated")) {
 				first[index] += suffix;
 			}
-			if (!second[index].contains("Desecrated")){
+			if (!second[index].contains("Desecrated")) {
 				second[index] += suffix;
 			}
 			if (!last[index].contains("Desecrated")) {
 				last[index] += suffix;
-			}		
+			}
 			if (index == 238 || index == 242) {
 				index++;
 			}
@@ -670,14 +779,13 @@ public class TerrorZoneHandler {
 		monsterLine[158] = Integer.toString((int) (Integer.parseInt(monsterLine[158]) * 1.25));
 		monsterLine[171] = Integer.toString((int) (Integer.parseInt(monsterLine[171]) * 1.25));
 		monsterLine[184] = Integer.toString((int) (Integer.parseInt(monsterLine[184]) * 1.25));
-		// TCs are handles in the special cases. only the council mobs and bosses have a
-		// special drop pool that doesn't scale
+		// TCs are handled in the special cases
 		this.monsters.put(monsterID, monsterLine);
 	}
 
 	public void applyChaos(int charlevel) {
 		Set<String> monsterStrings = new HashSet<String>();
-		Set<SpecialHandlingEntry> specialEntries = new HashSet<SpecialHandlingEntry>();
+		Set<SpecialMonster> specialEntries = new HashSet<SpecialMonster>();
 		Set<Integer> levelsSet = new HashSet<Integer>();
 		for (TerrorZone tz : TerrorZone.values()) {
 			if (tz == TerrorZone.RANDOM) {
@@ -694,9 +802,9 @@ public class TerrorZoneHandler {
 		for (String s : monsterStrings) {
 			monsterArray[i++] = s;
 		}
-		SpecialHandlingEntry[] specialArray = new SpecialHandlingEntry[specialEntries.size()];
+		SpecialMonster[] specialArray = new SpecialMonster[specialEntries.size()];
 		i = 0;
-		for (SpecialHandlingEntry s : specialEntries) {
+		for (SpecialMonster s : specialEntries) {
 			specialArray[i++] = s;
 		}
 		int[] levelsArray = new int[levelsSet.size()];
@@ -704,10 +812,9 @@ public class TerrorZoneHandler {
 		for (int s : levelsSet) {
 			levelsArray[i++] = s;
 		}
-		
+
 		this.desecrateMonsters(monsterArray, charlevel);
-		this.handleSpecialCases(specialArray, monsterArray, charlevel);
+		this.handleSpecialMonsters(specialArray, monsterArray, charlevel);
 		this.adjustAreaLevels(levelsArray, charlevel);
-		this.adjustCouncilTC();
 	}
 }

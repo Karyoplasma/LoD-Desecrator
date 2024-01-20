@@ -1,6 +1,6 @@
 package core;
 
-public enum SpecialHandlingEntry {
+public enum SpecialMonster {
 	CORPSEFIRE("Corpsefire"),
 	BISHIBOSH("Bishibosh"),
 	COLDCROW("Coldcrow"),
@@ -62,25 +62,25 @@ public enum SpecialHandlingEntry {
 	private String name;
 	private boolean hasSpecialTC, hasFixedTC;
 	
-	private SpecialHandlingEntry(String name) {
+	private SpecialMonster(String name) {
 		this.name = name;
 		this.hasSpecialTC = false;
 		this.hasFixedTC = false;
 	}
 	
-	private SpecialHandlingEntry(String name, boolean isMoreWork) {
+	private SpecialMonster(String name, boolean isMoreWork) {
 		this.name = name;
 		this.hasSpecialTC = isMoreWork;
 		this.hasFixedTC = false;
 	}
 	
-	private SpecialHandlingEntry(String name, boolean isMoreWork, boolean usesMonstatTC) {
+	private SpecialMonster(String name, boolean isMoreWork, boolean usesMonstatTC) {
 		this.name = name;
 		this.hasSpecialTC = isMoreWork;
 		this.hasFixedTC = usesMonstatTC;
 	}
 	
-	public boolean isMoreWork() {
+	public boolean hasSpecialTC() {
 		return hasSpecialTC;
 	}
 	
