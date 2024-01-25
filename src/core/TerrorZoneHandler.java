@@ -21,7 +21,7 @@ public class TerrorZoneHandler {
 	private Map<Integer, String[]> monsters, superuniques, levels;
 	private Map<String, Integer> monstersLookup, superuniquesLookup;
 
-	private TerrorZoneHandler() throws IOException {
+	private TerrorZoneHandler() {
 		this.monsters = this.readMonstersFromOriginal();
 		this.superuniques = this.readSuperUniquesFromOriginal();
 		this.levels = this.readLevelsFromOriginal();
@@ -29,135 +29,134 @@ public class TerrorZoneHandler {
 
 	public static TerrorZoneHandler getInstance() {
 		if (INSTANCE == null) {
-			try {
-				INSTANCE = new TerrorZoneHandler();
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-			}
+			INSTANCE = new TerrorZoneHandler();
 		}
 		return INSTANCE;
 	}
 
-	private Map<Integer, String[]> readLevelsFromOriginal() throws IOException {
+	private Map<Integer, String[]> readLevelsFromOriginal() {
 		Map<Integer, String[]> levels = new HashMap<Integer, String[]>();
-		BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles\\Levels.txt"));
-		String in = reader.readLine();
-		int lineNumber = 1;
-		levels.put(0, in.split("\\t"));
-		while ((in = reader.readLine()) != null) {
-			String[] line = in.split("\\t");
-			levels.put(lineNumber, line);
-			lineNumber++;
+		try (BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles\\Levels.txt"))) {
+			String in = reader.readLine();
+			int lineNumber = 1;
+			levels.put(0, in.split("\\t"));
+			while ((in = reader.readLine()) != null) {
+				String[] line = in.split("\\t");
+				levels.put(lineNumber, line);
+				lineNumber++;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		reader.close();
 		return levels;
 	}
 
-	private Map<Integer, String[]> readSuperUniquesFromOriginal() throws IOException {
+	private Map<Integer, String[]> readSuperUniquesFromOriginal() {
 		Map<Integer, String[]> superuniques = new HashMap<Integer, String[]>();
 		this.superuniquesLookup = new HashMap<String, Integer>();
-		BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles\\SuperUniques.txt"));
-		String in = reader.readLine();
-		int lineNumber = 1;
-		superuniques.put(0, in.split("\\t"));
-		while ((in = reader.readLine()) != null) {
-			String[] line = in.split("\\t");
-			superuniques.put(lineNumber, line);
-			superuniquesLookup.put(line[0], lineNumber);
-			lineNumber++;
+		try (BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles\\SuperUniques.txt"))) {
+			String in = reader.readLine();
+			int lineNumber = 1;
+			superuniques.put(0, in.split("\\t"));
+			while ((in = reader.readLine()) != null) {
+				String[] line = in.split("\\t");
+				superuniques.put(lineNumber, line);
+				superuniquesLookup.put(line[0], lineNumber);
+				lineNumber++;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		reader.close();
 		return superuniques;
 	}
 
-	private Map<Integer, String[]> readMonstersFromOriginal() throws IOException {
+	private Map<Integer, String[]> readMonstersFromOriginal() {
 		Map<Integer, String[]> monsters = new HashMap<Integer, String[]>();
 		this.monstersLookup = new HashMap<String, Integer>();
-		BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles\\monstats.txt"));
-		String in = reader.readLine();
-		int lineNumber = 1;
-		monsters.put(0, in.split("\\t"));
-		while ((in = reader.readLine()) != null) {
-			String[] line = in.split("\\t");
-			monsters.put(lineNumber, line);
-			monstersLookup.put(line[0], lineNumber);
-			lineNumber++;
+		try (BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles\\monstats.txt"))) {
+			String in = reader.readLine();
+			int lineNumber = 1;
+			monsters.put(0, in.split("\\t"));
+			while ((in = reader.readLine()) != null) {
+				String[] line = in.split("\\t");
+				monsters.put(lineNumber, line);
+				monstersLookup.put(line[0], lineNumber);
+				lineNumber++;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		reader.close();
 		return monsters;
 	}
 
-	public void rereadOriginals() throws IOException {
+	public void rereadOriginals() {
 		this.levels = this.readLevelsFromOriginal();
 		this.superuniques = this.readSuperUniquesFromOriginal();
 		this.monsters = readMonstersFromOriginal();
 	}
 
-	public void writeChanges() throws IOException {
+	public void writeChanges() {
 		this.writeSuperUniques();
 		this.writeMonstats();
 		this.writeLevels();
 		this.rereadOriginals();
 	}
 
-	private void writeSuperUniques() throws IOException {
-		BufferedWriter writer = new BufferedWriter(
-				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\SuperUniques.txt"));
+	private void writeSuperUniques() {
 		StringBuilder builder = new StringBuilder();
-
-		for (int i = 0; i < this.superuniques.size(); i++) {
-			builder.setLength(0);
-			String[] temp = this.superuniques.get(i);
-			for (String s : temp) {
-				builder.append(s).append("\t");
+		try (BufferedWriter writer = new BufferedWriter(
+				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\SuperUniques.txt"))) {
+			for (int i = 0; i < this.superuniques.size(); i++) {
+				builder.setLength(0);
+				String[] temp = this.superuniques.get(i);
+				for (String s : temp) {
+					builder.append(s).append("\t");
+				}
+				builder.setLength(builder.length() - 1);
+				builder.append(System.lineSeparator());
+				writer.write(builder.toString());
 			}
-			builder.setLength(builder.length() - 1);
-			builder.append(System.lineSeparator());
-			writer.write(builder.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		writer.flush();
-		writer.close();
-
 	}
 
-	private void writeMonstats() throws IOException {
-		BufferedWriter writer = new BufferedWriter(
-				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\monstats.txt"));
+	private void writeMonstats() {
 		StringBuilder builder = new StringBuilder();
-
-		for (int i = 0; i < this.monsters.size(); i++) {
-			builder.setLength(0);
-			String[] temp = this.monsters.get(i);
-			for (String s : temp) {
-				builder.append(s).append("\t");
+		try (BufferedWriter writer = new BufferedWriter(
+				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\monstats.txt"))) {
+			for (int i = 0; i < this.monsters.size(); i++) {
+				builder.setLength(0);
+				String[] temp = this.monsters.get(i);
+				for (String s : temp) {
+					builder.append(s).append("\t");
+				}
+				builder.setLength(builder.length() - 1);
+				builder.append(System.lineSeparator());
+				writer.write(builder.toString());
 			}
-			builder.setLength(builder.length() - 1);
-			builder.append(System.lineSeparator());
-			writer.write(builder.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		writer.flush();
-		writer.close();
-
 	}
 
-	private void writeLevels() throws IOException {
-		BufferedWriter writer = new BufferedWriter(
-				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\Levels.txt"));
+	private void writeLevels() {
 		StringBuilder builder = new StringBuilder();
-
-		for (int i = 0; i < this.levels.size(); i++) {
-			builder.setLength(0);
-			String[] temp = this.levels.get(i);
-			for (String s : temp) {
-				builder.append(s).append("\t");
+		try (BufferedWriter writer = new BufferedWriter(
+				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\Levels.txt"))) {
+			for (int i = 0; i < this.levels.size(); i++) {
+				builder.setLength(0);
+				String[] temp = this.levels.get(i);
+				for (String s : temp) {
+					builder.append(s).append("\t");
+				}
+				builder.setLength(builder.length() - 1);
+				builder.append(System.lineSeparator());
+				writer.write(builder.toString());
 			}
-			builder.setLength(builder.length() - 1);
-			builder.append(System.lineSeparator());
-			writer.write(builder.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		writer.flush();
-		writer.close();
 	}
 
 	public static void resetTerrorZones() {
@@ -290,113 +289,6 @@ public class TerrorZoneHandler {
 	private boolean monsterIsBoss(String monsterID) {
 		String[] monsterLines = monsters.get(monstersLookup.get(monsterID));
 		return !monsterLines[87].isEmpty();
-	}
-
-	@Deprecated
-	private void handleSpecialCases(SpecialMonster[] specialCases, String[] strings, int charlevel) {
-		for (SpecialMonster entry : specialCases) {
-			if (this.superuniquesLookup.containsKey(entry.toString())) {
-				// we can change it in superuniques
-				int superuniqueIndex = this.superuniquesLookup.get(entry.toString());
-				String[] superuniqueLines = this.superuniques.get(superuniqueIndex);
-				// if we haven't changed the base monster, change it now
-				if (!this.isStringInArray(superuniqueLines[2], strings)) {
-					this.desecrateMonster(superuniqueLines[2], charlevel);
-				}
-				// nameString
-				superuniqueLines[1] += "Terror";
-				// some monsters are weird
-				if (entry.hasFixedTC()) {
-					this.changeTCForSnowflakes(entry, charlevel);
-					continue;
-				}
-				// change the tc if it has a special one
-				if (entry.hasSpecialTC()) {
-					String tcSuffix = " Desecrated";
-					// Nihla has no ' A' suffix because of high level
-					if (!(entry == SpecialMonster.NIHLATHAK)) {
-						tcSuffix += " A";
-					}
-					superuniqueLines[17] += tcSuffix;
-					superuniqueLines[18] += tcSuffix;
-					superuniqueLines[19] += tcSuffix;
-				}
-			} else {
-				// this is a bossmonster with a special tc, no other possibility
-				int monsterIndex = this.monstersLookup.get(entry.toString());
-				this.desecrateMonster(entry.toString(), charlevel);
-				String[] monsterLine = monsters.get(monsterIndex);
-				for (int index = 236; index < 248; index += 4) {
-					// autotc upgrading does NOT work on placed bosses, so we have to do it manually
-					monsterLine[index] += this.getMonstatsTCSuffix(entry, charlevel, index);
-					monsterLine[index + 1] = monsterLine[index];
-					monsterLine[index + 2] = monsterLine[index];
-					monsterLine[index + 3] = monsterLine[index];
-				}
-			}
-		}
-	}
-	
-	@Deprecated
-	private void changeTCForSnowflakes(SpecialMonster entry, int charlevel) {
-		switch (entry) {
-		case GRISWOLD:
-		case RADAMENT:
-			String[] superunique = superuniques.get(superuniquesLookup.get(entry.toString()));
-			int arrayIndex = 17;
-			for (int index = 236; index < 248; index += 4) {
-				superunique[arrayIndex++] += this.getMonstatsTCSuffix(entry, charlevel, index);
-			}
-			break;
-		default:
-			System.err.println("DEFAULT SNOWFLAKE " + entry.name());
-			String monster = superuniques.get(superuniquesLookup.get(entry.toString()))[2];
-			int monsterIndex = this.monstersLookup.get(monster);
-			String[] monsterLine = monsters.get(monsterIndex);
-			for (int index = 236; index < 248; index += 4) {
-				monsterLine[index] += this.getMonstatsTCSuffix(entry, charlevel, index);
-				monsterLine[index + 1] = monsterLine[index];
-				monsterLine[index + 2] = monsterLine[index];
-				monsterLine[index + 3] = monsterLine[index];
-			}
-		}
-
-	}
-	
-	@Deprecated
-	private String getMonstatsTCSuffix(SpecialMonster entry, int charlevel, int index) {
-		int bosslevel = charlevel + 5;
-		int difficulty = 1;
-		if (index > 243) {
-			difficulty = 2;
-		}
-		if (index < 240) {
-			difficulty = 0;
-		}
-
-		switch (entry) {
-		case SUMMONER:
-			return this.getSummonerTCSuffix(difficulty, bosslevel);
-		case RADAMENT:
-			return this.getRadamentTCSuffix(difficulty, bosslevel);
-		case GRISWOLD:
-			return this.getGriswoldTCSuffix(difficulty, bosslevel);
-		case BLOODRAVEN:
-			return this.getBloodRavenTCSuffix(difficulty, bosslevel);
-		case ANDARIEL:
-			return this.getAndarielTCSuffix(difficulty, bosslevel);
-		case DURIEL:
-			return this.getDurielTCSuffix(difficulty, bosslevel);
-		case MEPHISTO:
-			return this.getMephistoTCSuffix(difficulty, bosslevel);
-		case DIABLO:
-			return this.getDiabloTCSuffix(difficulty, bosslevel);
-		case IZUAL:
-			return this.getIzualTCSuffic(difficulty, bosslevel);
-		default:
-			System.err.println("Default case detected for: " + entry.name());
-			return " Desecrated";
-		}
 	}
 
 	private String getSummonerTCSuffix(int difficulty, int bosslevel) {

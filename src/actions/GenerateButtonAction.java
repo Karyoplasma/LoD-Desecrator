@@ -1,7 +1,6 @@
 package actions;
 
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,23 +24,20 @@ public class GenerateButtonAction extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		TerrorZone selection = (TerrorZone) gui.getComboBoxTerrorZone().getSelectedItem();
-		try {
-			TerrorZoneHandler handler = TerrorZoneHandler.getInstance();
-			if (selection == TerrorZone.RANDOM) {
-				List<TerrorZone> possibleZones = new ArrayList<TerrorZone>();
-				possibleZones.addAll(Arrays.asList(TerrorZone.values()));
-				possibleZones.remove(TerrorZone.RANDOM);
-				Collections.shuffle(possibleZones);
-				selection = possibleZones.get(0);
-			}
-			System.out.println(selection);
-			handler.applyTerrorZone(selection, gui.getCharLevel());
-			handler.writeChanges();
-			gui.getComboBoxTerrorZone().setSelectedIndex(selection.ordinal());
-			gui.repaintGUI();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
+		TerrorZoneHandler handler = TerrorZoneHandler.getInstance();
+		if (selection == TerrorZone.RANDOM) {
+			List<TerrorZone> possibleZones = new ArrayList<TerrorZone>();
+			possibleZones.addAll(Arrays.asList(TerrorZone.values()));
+			possibleZones.remove(TerrorZone.RANDOM);
+			Collections.shuffle(possibleZones);
+			selection = possibleZones.get(0);
 		}
+		System.out.println(selection);
+		handler.applyTerrorZone(selection, gui.getCharLevel());
+		handler.writeChanges();
+		gui.getComboBoxTerrorZone().setSelectedIndex(selection.ordinal());
+		gui.repaintGUI();
+
 	}
 
 }

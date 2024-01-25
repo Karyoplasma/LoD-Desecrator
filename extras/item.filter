@@ -1140,21 +1140,33 @@ Show
 Show
 	Type Jewel
 	Rarity Magic
-	SetName {Red}{Name}
+	SetStyle CraftingGear
+
+Show
+	Type Amulet
+	Rarity Magic
+	ItemLevel > 89
+	SetDescription {Description}{White}Craft {Blue}Caster Amulet{White}: {Purple}0 {White}Perfect + {Blue}Jewel {White}+ {Orange}Ral{Newline}
 	SetStyle CraftingGear
 
 Show
 	Type Sharkskin Belt, Vampirefang Belt
 	Rarity Magic
-	SetName {Red}{Name}
+	SetDescription {Description}{White}Craft {Blue}Caster Belt{White}: {Purple}0 {White}Perfect + {Blue}Jewel {White}+ {Orange}Ith{Newline}
 	SetStyle CraftingGear
 
 Show
-	Type Sharkskin Gloves, Vampirebone Gloves, Mesh Belt, Mithril Coil
+	Type Mesh Belt, Mithril Coil
 	Rarity Magic
-	SetName {Red}{Name}
+	SetDescription {Description}{White}Craft {Red}Blood Belt{White}: {Red}0 {White}Perfect + {Blue}Jewel {White}+ {Orange}Tal{Newline}
 	SetStyle CraftingGear
-	
+
+Show
+	Type Sharkskin Gloves, Vampirebone Gloves
+	Rarity Magic
+	SetDescription {Description}{White}Craft {Red}Blood Gloves{White}: {Red}0 {White}Perfect + {Blue}Jewel {White}+ {Orange}Nef{Newline}
+	SetStyle CraftingGear
+		
 ######
 # Spirit Pally Shields
 ######	
@@ -1250,6 +1262,11 @@ Show
 ######
 # Magic/Rares/Misc...
 ######
+
+#Show identified items
+Show
+	Rarity >= Magic
+	Identified True
 
 #Show any Set, Rare, Unique, Crafted, Tempered
 Show
