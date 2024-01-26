@@ -96,7 +96,7 @@ public class TerrorZoneHandler {
 		this.levels = this.readLevelsFromOriginal();
 		this.superuniques = this.readSuperUniquesFromOriginal();
 		this.monsters = readMonstersFromOriginal();
-		if (this.levels == null && this.superuniques == null && this.monsters == null) {
+		if (this.levels == null || this.superuniques == null || this.monsters == null) {
 			return 1;
 		}
 		return 0;
