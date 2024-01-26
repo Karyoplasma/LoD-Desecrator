@@ -34,9 +34,10 @@ public class GenerateButtonAction extends AbstractAction {
 		}
 		System.out.println(selection);
 		handler.applyTerrorZone(selection, gui.getCharLevel());
-		handler.writeChanges();
+		int errorLevel = handler.writeChanges();
+		gui.getStatusPanel().setStatusColor(errorLevel);
 		gui.getComboBoxTerrorZone().setSelectedIndex(selection.ordinal());
-		gui.repaintGUI();
+		gui.repaintComboBox();
 
 	}
 

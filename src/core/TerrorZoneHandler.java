@@ -47,6 +47,7 @@ public class TerrorZoneHandler {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			return null;
 		}
 		return levels;
 	}
@@ -66,6 +67,7 @@ public class TerrorZoneHandler {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			return null;
 		}
 		return superuniques;
 	}
@@ -85,24 +87,30 @@ public class TerrorZoneHandler {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			return null;
 		}
 		return monsters;
 	}
 
-	public void rereadOriginals() {
+	public int rereadOriginals() {
 		this.levels = this.readLevelsFromOriginal();
 		this.superuniques = this.readSuperUniquesFromOriginal();
 		this.monsters = readMonstersFromOriginal();
+		if (this.levels == null && this.superuniques == null && this.monsters == null) {
+			return 1;
+		}
+		return 0;
 	}
 
-	public void writeChanges() {
-		this.writeSuperUniques();
-		this.writeMonstats();
-		this.writeLevels();
-		this.rereadOriginals();
+	public int writeChanges() {
+		int superuniqueStatus = this.writeSuperUniques();
+		int monstatsStatus = this.writeMonstats();
+		int levelsStatus = this.writeLevels();
+		int rereadStatus = this.rereadOriginals();
+		return Math.max(Math.max(superuniqueStatus, monstatsStatus), Math.max(levelsStatus, rereadStatus));
 	}
 
-	private void writeSuperUniques() {
+	private int writeSuperUniques() {
 		StringBuilder builder = new StringBuilder();
 		try (BufferedWriter writer = new BufferedWriter(
 				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\SuperUniques.txt"))) {
@@ -118,10 +126,12 @@ public class TerrorZoneHandler {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			return 1;
 		}
+		return 0;
 	}
 
-	private void writeMonstats() {
+	private int writeMonstats() {
 		StringBuilder builder = new StringBuilder();
 		try (BufferedWriter writer = new BufferedWriter(
 				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\monstats.txt"))) {
@@ -137,10 +147,12 @@ public class TerrorZoneHandler {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			return 1;
 		}
+		return 0;
 	}
 
-	private void writeLevels() {
+	private int writeLevels() {
 		StringBuilder builder = new StringBuilder();
 		try (BufferedWriter writer = new BufferedWriter(
 				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\Levels.txt"))) {
@@ -156,10 +168,12 @@ public class TerrorZoneHandler {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			return 1;
 		}
+		return 0;
 	}
 
-	public static void resetTerrorZones() {
+	public static int resetTerrorZones() {
 		Path superuniquesFile = Paths.get("OriginalFiles\\SuperUniques.txt");
 		Path superuniquesPath = Paths.get("D:\\Games\\Diablo II\\Data\\Global\\Excel\\SuperUniques.txt");
 		Path monstatsFile = Paths.get("OriginalFiles\\monstats.txt");
@@ -173,7 +187,9 @@ public class TerrorZoneHandler {
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("Error occurred: " + e.getMessage());
+			return 1;
 		}
+		return 0;
 	}
 
 	public void applyTerrorZone(TerrorZone selection, int charlevel) {

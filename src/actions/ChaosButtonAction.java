@@ -21,8 +21,9 @@ public class ChaosButtonAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		TerrorZoneHandler handler = TerrorZoneHandler.getInstance();
 		handler.applyChaos(gui.getCharLevel());
-		handler.writeChanges();
+		int errorLevel = handler.writeChanges();
+		gui.getStatusPanel().setStatusColor(errorLevel);
 		gui.getComboBoxTerrorZone().setSelectedIndex(-1);
-		gui.repaintGUI();
+		gui.repaintComboBox();
 	}
 }

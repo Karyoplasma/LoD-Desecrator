@@ -7,6 +7,7 @@ import net.miginfocom.swing.MigLayout;
 import java.awt.Font;
 import javax.swing.JButton;
 import actions.ResetButtonAction;
+import component.StatusPanel;
 import core.TerrorZone;
 import actions.ChaosButtonAction;
 import actions.GenerateButtonAction;
@@ -25,6 +26,7 @@ public class DesecratorGUI {
 	private JComboBox<TerrorZone> comboBoxTerrorZone;
 	private JSpinner spinnerCharLevel;
 	private JButton btnChaos;
+	private StatusPanel statusPanel;
  
 	/**
 	 * Launch the application.
@@ -57,7 +59,7 @@ public class DesecratorGUI {
 		frmDesecrator.setTitle("Terror Zones 2.6");
 		frmDesecrator.setBounds(100, 100, 450, 144);
 		frmDesecrator.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmDesecrator.getContentPane().setLayout(new MigLayout("", "[][grow][]", "[grow][][]"));
+		frmDesecrator.getContentPane().setLayout(new MigLayout("", "[][grow][]", "[grow][][grow]"));
 		
 		comboBoxTerrorZone = new JComboBox<TerrorZone>(new ComboBoxTerrorZoneModel());
 		comboBoxTerrorZone.setFont(new Font("Tahoma", Font.BOLD, 14));
@@ -65,11 +67,11 @@ public class DesecratorGUI {
 		
 		lblCharacterLevel = new JLabel("Character level:");
 		lblCharacterLevel.setFont(new Font("Tahoma", Font.BOLD, 14));
-		frmDesecrator.getContentPane().add(lblCharacterLevel, "cell 0 1,alignx trailing,aligny bottom");
+		frmDesecrator.getContentPane().add(lblCharacterLevel, "cell 0 1,alignx trailing,growy");
 		
 		spinnerCharLevel = new JSpinner();
 		spinnerCharLevel.setModel(new SpinnerNumberModel(1, 1, 99, 1));
-		frmDesecrator.getContentPane().add(spinnerCharLevel, "cell 1 1,growx,aligny bottom");
+		frmDesecrator.getContentPane().add(spinnerCharLevel, "cell 1 1,grow");
 		
 		btnGenerate = new JButton(new GenerateButtonAction(this));
 		btnGenerate.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -78,6 +80,9 @@ public class DesecratorGUI {
 		btnChaos = new JButton(new ChaosButtonAction(this));
 		btnChaos.setFont(new Font("Tahoma", Font.BOLD, 14));
 		frmDesecrator.getContentPane().add(btnChaos, "cell 0 2");
+		
+		statusPanel = new StatusPanel();
+		frmDesecrator.getContentPane().add(statusPanel, "cell 1 2,grow");
 		
 		btnReset = new JButton(new ResetButtonAction(this));
 		btnReset.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -94,7 +99,11 @@ public class DesecratorGUI {
 		return this.comboBoxTerrorZone;
 	}
 	
-	public void repaintGUI() {
-		this.frmDesecrator.repaint();
+	public void repaintComboBox() {
+		this.comboBoxTerrorZone.repaint();
+	}
+	
+	public StatusPanel getStatusPanel() {
+		return this.statusPanel;
 	}
 }

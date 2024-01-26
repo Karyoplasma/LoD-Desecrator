@@ -18,9 +18,10 @@ public class ResetButtonAction extends AbstractAction {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		TerrorZoneHandler.resetTerrorZones();
+		int errorLevel = TerrorZoneHandler.resetTerrorZones();
+		gui.getStatusPanel().setStatusColor(errorLevel);
 		gui.getComboBoxTerrorZone().setSelectedIndex(-1);
-		gui.repaintGUI();
+		gui.repaintComboBox();
 	}
 
 }
