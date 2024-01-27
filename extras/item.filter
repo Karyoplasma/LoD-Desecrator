@@ -676,6 +676,7 @@ Show
 	Sockets 4
 	Rarity < Magic
 	Runeword False
+	Stats "Amazon +%d to Bow and Crossbow Skills" > 2
 	SetName {Purple}{Name}
 	SetDescription {Description}{White}Brand: {Orange}JahLoMalGul {Gray}| {White}Faith: {Orange}OhmJahLemEld{Newline}
 	SetDescription {Description}{White}Harmony: {Orange}TirIthSolKo {Gray}| {White}Ice: {Orange}AmnShaelJahLo{Newline}
@@ -686,6 +687,7 @@ Show
 	Sockets 5
 	Rarity < Magic
 	Runeword False
+	Stats "Amazon +%d to Bow and Crossbow Skills" > 2
 	SetName {Purple}{Name}
 	SetDescription {Description}{White}Mist: {Orange}ChamShaelGulThulIth{Newline}
 	SetStyle RuneWordBase
@@ -698,6 +700,7 @@ Show
 	Sockets 4
 	Rarity < Magic
 	Runeword False
+	Stats "Amazon +%d to Bow and Crossbow Skills" > 2
 	SetName {Purple}{Name}
 	SetDescription {Description}{White}Faith: {Orange}OhmJahLemEld{Newline}
 	SetStyle RuneWordBase
@@ -707,6 +710,7 @@ Show
 	Sockets 5
 	Rarity < Magic
 	Runeword False
+	Stats "Amazon +%d to Bow and Crossbow Skills" > 2
 	SetName {Purple}{Name}
 	SetDescription {Description}{White}Mist: {Orange}ChamShaelGulThulIth{Newline}
 	SetStyle RuneWordBase
@@ -1190,7 +1194,7 @@ Show
 	Sockets 0, 2, 3, 4
 	Runeword false
 	Ethereal false
-	Stats "All Resist" > 35
+	Stats "All Resist" > 39
 	SetStyle RuneWordCraftingBase
 
 ######
@@ -1211,9 +1215,8 @@ Show
 ######
 Show
 	Type Matriarchal Bow, Grand Matron Bow
-	Rarity < Magic
-	Sockets 0,4,5
-	Runeword false
+	Rarity Superior
+	Sockets 0
 	Stats "Amazon +%d to Bow and Crossbow Skills" > 2
 	SetStyle RuneWordCraftingBase
 

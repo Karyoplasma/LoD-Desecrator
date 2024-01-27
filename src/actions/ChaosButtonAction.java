@@ -12,13 +12,15 @@ public class ChaosButtonAction extends AbstractAction {
 
 	private static final long serialVersionUID = -2853653915662613129L;
 	DesecratorGUI gui;
-	
+
 	public ChaosButtonAction(DesecratorGUI gui) {
 		putValue(Action.NAME, "TOTAL CHAOS");
 		this.gui = gui;
 	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		gui.getStatusPanel().declareWorking();
 		TerrorZoneHandler handler = TerrorZoneHandler.getInstance();
 		handler.applyChaos(gui.getCharLevel());
 		int errorLevel = handler.writeChanges();

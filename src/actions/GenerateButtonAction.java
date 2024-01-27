@@ -23,7 +23,12 @@ public class GenerateButtonAction extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		gui.getStatusPanel().declareWorking();
 		TerrorZone selection = (TerrorZone) gui.getComboBoxTerrorZone().getSelectedItem();
+		if (selection == null) {
+			gui.getStatusPanel().setStatusColor(2);
+			return;
+		}
 		TerrorZoneHandler handler = TerrorZoneHandler.getInstance();
 		if (selection == TerrorZone.RANDOM) {
 			List<TerrorZone> possibleZones = new ArrayList<TerrorZone>();
@@ -32,7 +37,7 @@ public class GenerateButtonAction extends AbstractAction {
 			Collections.shuffle(possibleZones);
 			selection = possibleZones.get(0);
 		}
-		System.out.println(selection);
+
 		handler.applyTerrorZone(selection, gui.getCharLevel());
 		int errorLevel = handler.writeChanges();
 		gui.getStatusPanel().setStatusColor(errorLevel);
