@@ -12,6 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -196,21 +197,27 @@ public class TerrorZoneHandler {
 		if (selection == TerrorZone.TRAVINCAL || selection == TerrorZone.DURANCE_OF_HATE) {
 			this.adjustCouncilTC();
 		}
-		this.desecrateMonsters(selection.getMonsters(), charlevel);
+		String[] monsterSpawns = this.gatherMonsters(selection);
+		this.desecrateMonsters(monsterSpawns, charlevel);
 		this.adjustAreaLevels(selection.getLevelLines(), charlevel);
-		this.handleSpecialMonsters(selection.getSpecialCases(), selection.getMonsters(), charlevel);
+		this.unlinkPresets(selection.getPresetMonsters());
+		this.handleSpecialMonsters(selection.getSpecialCases(), charlevel);
 	}
 
-	private void handleSpecialMonsters(SpecialMonster[] specialMonsters, String[] areaMonsters, int charlevel) {
+	private void unlinkPresets(String[] presetMonsters) {
+		for (String monster : presetMonsters) {
+			int monsterID = monstersLookup.get(monster);
+			monsters.get(monsterID)[3] = "";
+		}	
+	}
+
+	private void handleSpecialMonsters(SpecialMonster[] specialMonsters, int charlevel) {
 		for (SpecialMonster specialMonster : specialMonsters) {
 			if (this.superuniquesLookup.containsKey(specialMonster.toString())) {
 				int superuniqueIndex = this.superuniquesLookup.get(specialMonster.toString());
 				String[] superuniqueLines = this.superuniques.get(superuniqueIndex);
 				if (this.monsterIsBoss(superuniqueLines[2])) {
 					superuniqueLines[1] += "Terror";
-					if (!this.isStringInArray(superuniqueLines[2], areaMonsters)) {
-						this.desecrateMonster(superuniqueLines[2], charlevel);
-					}
 					this.setBossTC(specialMonster, superuniqueLines[2], charlevel);
 					continue;
 				}
@@ -219,9 +226,6 @@ public class TerrorZoneHandler {
 				case BREMM:
 					this.adjustCouncilTC();
 				default:
-					if (!this.isStringInArray(superuniqueLines[2], areaMonsters)) {
-						this.desecrateMonster(superuniqueLines[2], charlevel);
-					}
 					superuniqueLines[1] += "Terror";
 					if (specialMonster.hasSpecialTC()) {
 						String tcSuffix = " Desecrated";
@@ -635,9 +639,6 @@ public class TerrorZoneHandler {
 				index++;
 			}
 		}
-		monsters.put(firstID, first);
-		monsters.put(secondID, second);
-		monsters.put(lastID, last);
 	}
 
 	public boolean isStringInArray(String str, String[] array) {
@@ -656,7 +657,6 @@ public class TerrorZoneHandler {
 			levelLine[59] = Integer.toString(Math.max(Math.min(45, charlevel + 2), Integer.parseInt(levelLine[59])));
 			levelLine[60] = Integer.toString(Math.max(Math.min(71, charlevel + 2), Integer.parseInt(levelLine[60])));
 			levelLine[61] = Integer.toString(Math.max(Math.min(96, charlevel + 2), Integer.parseInt(levelLine[61])));
-			this.levels.put(area, levelLine);
 		}
 	}
 
@@ -670,8 +670,11 @@ public class TerrorZoneHandler {
 		int monsterID = this.monstersLookup.get(monster);
 		String[] monsterLine = this.monsters.get(monsterID);
 		// change name
+		if (monsterLine[5].endsWith("Terror")) {
+			return;
+		}
 		monsterLine[5] += "Terror";
-		// change level for normal or, if boss, for all
+		// change level
 		if (!monsterLine[87].isEmpty()) {
 			monsterLine[31] = Integer
 					.toString(Math.max(Math.min(48, charlevel + 5), Integer.parseInt(monsterLine[31])));
@@ -682,25 +685,30 @@ public class TerrorZoneHandler {
 		} else {
 			monsterLine[31] = Integer
 					.toString(Math.max(Math.min(45, charlevel + 2), Integer.parseInt(monsterLine[31])));
+			monsterLine[32] = Integer
+					.toString(Math.max(Math.min(71, charlevel + 2), Integer.parseInt(monsterLine[32])));
+			monsterLine[33] = Integer
+					.toString(Math.max(Math.min(96, charlevel + 2), Integer.parseInt(monsterLine[33])));
 		}
 		// adjust xp
 		monsterLine[158] = Integer.toString((int) (Integer.parseInt(monsterLine[158]) * 1.25));
 		monsterLine[171] = Integer.toString((int) (Integer.parseInt(monsterLine[171]) * 1.25));
 		monsterLine[184] = Integer.toString((int) (Integer.parseInt(monsterLine[184]) * 1.25));
 		// TCs are handled in the special cases
-		this.monsters.put(monsterID, monsterLine);
 	}
 
 	public void applyChaos(int charlevel) {
 		Set<String> monsterStrings = new HashSet<String>();
 		Set<SpecialMonster> specialEntries = new HashSet<SpecialMonster>();
 		Set<Integer> levelsSet = new HashSet<Integer>();
+		Set<String> presetMonsters = new HashSet<String>();
 		for (TerrorZone tz : TerrorZone.values()) {
 			if (tz == TerrorZone.RANDOM) {
 				continue;
 			}
-			monsterStrings.addAll(Arrays.asList(tz.getMonsters()));
+			monsterStrings.addAll(Arrays.asList(this.gatherMonsters(tz)));
 			specialEntries.addAll(Arrays.asList(tz.getSpecialCases()));
+			presetMonsters.addAll(Arrays.asList(tz.getPresetMonsters()));
 			for (int level : tz.getLevelLines()) {
 				levelsSet.add(level);
 			}
@@ -720,9 +728,65 @@ public class TerrorZoneHandler {
 		for (int s : levelsSet) {
 			levelsArray[i++] = s;
 		}
-
+		String[] presetArray = new String[presetMonsters.size()];
+		i = 0;
+		for (String s : presetMonsters) {
+			presetArray[i++] = s;
+		}
 		this.desecrateMonsters(monsterArray, charlevel);
-		this.handleSpecialMonsters(specialArray, monsterArray, charlevel);
+		this.unlinkPresets(presetArray);
+		this.handleSpecialMonsters(specialArray, charlevel);
 		this.adjustAreaLevels(levelsArray, charlevel);
+	}
+
+	private String[] gatherMonsters(TerrorZone tz) {
+		List<String> presets = Arrays.asList(tz.getPresetMonsters()); 
+		Set<String> monstersSet = new HashSet<String>(presets);
+		
+		for (int level : tz.getLevelLines()) {
+			for (int i = 74; i < 105; i++) {
+				if (i == 84) {
+					continue;
+				}
+				if (!levels.get(level)[i].isEmpty()) {
+					monstersSet.add(levels.get(level)[i]);
+				}
+			}
+		}
+		for (SpecialMonster special : tz.getSpecialCases()) {
+			if (superuniquesLookup.containsKey(special.toString())) {
+				String superuniqueID = superuniques.get(superuniquesLookup.get(special.toString()))[2];
+				monstersSet.add(superuniqueID);
+			} else {
+				monstersSet.add(special.toString());
+			}
+		}
+		Set<String> minions = new HashSet<String>();
+		
+		do {
+			minions.clear();
+			for (String monster : monstersSet) {
+				String spawn = monsters.get(monstersLookup.get(monster))[15];
+				String minion1 = monsters.get(monstersLookup.get(monster))[19];
+				String minion2 = monsters.get(monstersLookup.get(monster))[20];
+				if (!spawn.isEmpty() && !monstersSet.contains(spawn)) {
+					minions.add(spawn);
+				}
+				if (!minion1.isEmpty() && !monstersSet.contains(minion1)) {
+					minions.add(minion1);
+				}
+				if (!minion2.isEmpty() && !monstersSet.contains(minion2)) {
+					minions.add(minion2);
+				}
+			}
+			monstersSet.addAll(minions);
+		}
+		while (!minions.isEmpty());
+		String[] ret = new String[monstersSet.size()];
+		int index = 0;
+		for (String monster : monstersSet) {
+			ret[index++] = monster;
+		}
+		return ret;
 	}
 }
