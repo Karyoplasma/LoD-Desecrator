@@ -34,7 +34,265 @@ public class TerrorZoneHandler {
 		}
 		return INSTANCE;
 	}
+	
+	public void applyChaos(int charlevel) {
+		Set<String> monsterStrings = new HashSet<String>();
+		Set<SpecialMonster> specialEntries = new HashSet<SpecialMonster>();
+		Set<Integer> levelsSet = new HashSet<Integer>();
+		Set<String> presetsSet = new HashSet<String>();
+		for (TerrorZone tz : TerrorZone.values()) {
+			if (tz == TerrorZone.RANDOM) {
+				continue;
+			}
+			monsterStrings.addAll(Arrays.asList(this.gatherMonsters(tz)));
+			specialEntries.addAll(Arrays.asList(tz.getSpecialCases()));
+			presetsSet.addAll(Arrays.asList(tz.getPresetMonsters()));
+			for (int level : tz.getLevelLines()) {
+				levelsSet.add(level);
+			}
+		}
+		String[] monsterArray = new String[monsterStrings.size()];
+		int i = 0;
+		for (String s : monsterStrings) {
+			monsterArray[i++] = s;
+		}
+		String[] presetsArray = new String[presetsSet.size()];
+		i = 0;
+		for (String preset : presetsSet) {
+			presetsArray[i++] = preset;
+		}
+		SpecialMonster[] specialArray = new SpecialMonster[specialEntries.size()];
+		i = 0;
+		for (SpecialMonster s : specialEntries) {
+			specialArray[i++] = s;
+		}
+		int[] levelsArray = new int[levelsSet.size()];
+		i = 0;
+		for (int s : levelsSet) {
+			levelsArray[i++] = s;
+		}
+		this.desecrateMonsters(monsterArray, presetsArray, charlevel);
+		this.handleSpecialMonsters(specialArray, charlevel);
+		this.adjustAreaLevels(levelsArray, charlevel);
+	}
 
+	public void applyTerrorZone(TerrorZone selection, int charlevel) {
+		if (selection == TerrorZone.TRAVINCAL || selection == TerrorZone.DURANCE_OF_HATE) {
+			this.adjustCouncilTC();
+		}
+		String[] monsterSpawns = this.gatherMonsters(selection);
+		this.desecrateMonsters(monsterSpawns, selection.getPresetMonsters(), charlevel);
+		this.adjustAreaLevels(selection.getLevelLines(), charlevel);
+		this.handleSpecialMonsters(selection.getSpecialCases(), charlevel);
+	}
+	
+	private void handleSpecialMonsters(SpecialMonster[] specialMonsters, int charlevel) {
+		for (SpecialMonster specialMonster : specialMonsters) {
+			if (this.superuniquesLookup.containsKey(specialMonster.toString())) {
+				int superuniqueIndex = this.superuniquesLookup.get(specialMonster.toString());
+				String[] superuniqueLines = this.superuniques.get(superuniqueIndex);
+				if (this.monsterIsBoss(superuniqueLines[2])) {
+					superuniqueLines[1] += "Terror";
+					this.setBossTC(specialMonster, superuniqueLines[2], charlevel);
+					continue;
+				}
+				switch (specialMonster) {
+				case ISMAIL:
+				case BREMM:
+					this.adjustCouncilTC();
+				default:
+					superuniqueLines[1] += "Terror";
+					if (specialMonster.hasSpecialTC()) {
+						String tcSuffix = " Desecrated";
+						if (specialMonster != SpecialMonster.NIHLATHAK) {
+							tcSuffix += " A";
+						}
+						superuniqueLines[17] += tcSuffix;
+						superuniqueLines[18] += tcSuffix;
+						superuniqueLines[19] += tcSuffix;
+					}
+				}
+			} else {
+				this.setBossTC(specialMonster, specialMonster.toString(), charlevel);
+			}
+		}
+	}
+
+	private void setBossTC(SpecialMonster boss, String monsterID, int charlevel) {
+		TCCalculator tcCalc = new TCCalculator(charlevel);
+		switch (boss) {
+		case ANDARIEL:
+		case BAAL:
+		case BLOODRAVEN:
+		case DIABLO:
+		case DURIEL:
+		case IZUAL:
+		case MEPHISTO:
+		case SUMMONER:
+			String[] monsterLines = monsters.get(monstersLookup.get(monsterID));		
+			String[] monstatsTCSuffixes = tcCalc.getBossTCSuffixes(boss);
+			for (int i = 0; i < 3; i++) {
+				monsterLines[236 + (4 * i)] += monstatsTCSuffixes[i];
+				monsterLines[237 + (4 * i)] = monsterLines[236 + (4 * i)];
+				monsterLines[238 + (4 * i)] = monsterLines[236 + (4 * i)];
+				monsterLines[239 + (4 * i)] = monsterLines[236 + (4 * i)];
+			}
+			break;
+		case GRISWOLD:
+		case NIHLATHAK:
+		case RADAMENT:
+			String[] superuniqueLines = superuniques.get(superuniquesLookup.get(boss.toString()));
+			String[] superuniquesTCSuffixes = tcCalc.getBossTCSuffixes(boss); 
+			superuniqueLines[17] += superuniquesTCSuffixes[0];
+			superuniqueLines[18] += superuniquesTCSuffixes[1];
+			superuniqueLines[19] += superuniquesTCSuffixes[2];
+			break;
+		default:
+			System.err.println("default case for setBossTC should never happen! Boss: " + boss.toString());
+		}
+	}
+
+	private boolean monsterIsBoss(String monsterID) {
+		String[] monsterLines = monsters.get(monstersLookup.get(monsterID));
+		return !monsterLines[87].isEmpty();
+	}
+
+	private void adjustCouncilTC() {
+		String suffix = " Desecrated A";
+		int firstID = monstersLookup.get("councilmember1");
+		String[] first = monsters.get(firstID);
+		int secondID = monstersLookup.get("councilmember2");
+		String[] second = monsters.get(secondID);
+		int lastID = monstersLookup.get("councilmember3");
+		String[] last = monsters.get(lastID);
+		for (int index = 236; index < 247; index++) {
+			if (!first[index].contains("Desecrated")) {
+				first[index] += suffix;
+			}
+			if (!second[index].contains("Desecrated")) {
+				second[index] += suffix;
+			}
+			if (!last[index].contains("Desecrated")) {
+				last[index] += suffix;
+			}
+			if (index == 238 || index == 242) {
+				index++;
+			}
+		}
+	}
+
+	private void adjustAreaLevels(int[] levelLines, int charlevel) {
+		for (int area : levelLines) {
+			// max alvls are 45, 71 and 96
+			String[] levelLine = this.levels.get(area);
+			// don't adjust monlvl1ex as this will screw up presets, the other columns are fine
+			levelLine[60] = Integer.toString(Math.max(Math.min(71, charlevel + 2), Integer.parseInt(levelLine[60])));
+			levelLine[61] = Integer.toString(Math.max(Math.min(96, charlevel + 2), Integer.parseInt(levelLine[61])));
+		}
+	}
+
+	private void desecrateMonsters(String[] monsterStrings, String[] presets, int charlevel) {
+		for (String monster : monsterStrings) {
+			this.desecrateMonster(monster, presets, charlevel);
+		}
+	}
+
+	private void desecrateMonster(String monster, String[] presets, int charlevel) {
+		int monsterID = this.monstersLookup.get(monster);
+		String[] monsterLine = this.monsters.get(monsterID);
+		// change name
+		if (monsterLine[5].endsWith("Terror")) {
+			return;
+		}
+		monsterLine[5] += "Terror";
+		// change level
+		if (!monsterLine[87].isEmpty()) {
+			monsterLine[31] = Integer
+					.toString(Math.max(Math.min(48, charlevel + 5), Integer.parseInt(monsterLine[31])));
+			monsterLine[32] = Integer
+					.toString(Math.max(Math.min(74, charlevel + 5), Integer.parseInt(monsterLine[32])));
+			monsterLine[33] = Integer
+					.toString(Math.max(Math.min(99, charlevel + 5), Integer.parseInt(monsterLine[33])));
+		} else {
+			if (!this.isPreset(monster, presets)) {
+				monsterLine[31] = Integer
+						.toString(Math.max(Math.min(45, charlevel + 2), Integer.parseInt(monsterLine[31])));
+			}
+			monsterLine[32] = Integer
+					.toString(Math.max(Math.min(71, charlevel + 2), Integer.parseInt(monsterLine[32])));
+			monsterLine[33] = Integer
+					.toString(Math.max(Math.min(96, charlevel + 2), Integer.parseInt(monsterLine[33])));
+		}
+		// adjust xp
+		monsterLine[158] = Integer.toString((int) (Integer.parseInt(monsterLine[158]) * 1.25));
+		monsterLine[171] = Integer.toString((int) (Integer.parseInt(monsterLine[171]) * 1.25));
+		monsterLine[184] = Integer.toString((int) (Integer.parseInt(monsterLine[184]) * 1.25));
+	}
+
+	private boolean isPreset(String monster, String[] presets) {
+		for (String preset : presets) {
+			if (monster.equals(preset)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private String[] gatherMonsters(TerrorZone tz) {
+		List<String> presets = Arrays.asList(tz.getPresetMonsters()); 
+		Set<String> monstersSet = new HashSet<String>(presets);
+		
+		for (int level : tz.getLevelLines()) {
+			for (int i = 74; i < 105; i++) {
+				if (i == 84) {
+					continue;
+				}
+				if (!levels.get(level)[i].isEmpty()) {
+					monstersSet.add(levels.get(level)[i]);
+				}
+			}
+		}
+		for (SpecialMonster special : tz.getSpecialCases()) {
+			if (superuniquesLookup.containsKey(special.toString())) {
+				String superuniqueID = superuniques.get(superuniquesLookup.get(special.toString()))[2];
+				monstersSet.add(superuniqueID);
+			} else {
+				monstersSet.add(special.toString());
+			}
+		}
+		Set<String> minions = new HashSet<String>();
+		
+		do {
+			minions.clear();
+			for (String monster : monstersSet) {
+				String spawn = monsters.get(monstersLookup.get(monster))[15];
+				String minion1 = monsters.get(monstersLookup.get(monster))[19];
+				String minion2 = monsters.get(monstersLookup.get(monster))[20];
+				if (!spawn.isEmpty() && !monstersSet.contains(spawn)) {
+					minions.add(spawn);
+				}
+				if (!minion1.isEmpty() && !monstersSet.contains(minion1)) {
+					minions.add(minion1);
+				}
+				if (!minion2.isEmpty() && !monstersSet.contains(minion2)) {
+					minions.add(minion2);
+				}
+			}
+			monstersSet.addAll(minions);
+		}
+		while (!minions.isEmpty());
+		monstersSet.remove("baaltaunt");
+		String[] ret = new String[monstersSet.size()];
+		int index = 0;
+		for (String monster : monstersSet) {
+			ret[index++] = monster;
+		}
+		return ret;
+	}
+	
+	
+	// I/O stuff from here on
+	
 	private Map<Integer, String[]> readLevelsFromOriginal() {
 		Map<Integer, String[]> levels = new HashMap<Integer, String[]>();
 		try (BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles\\Levels.txt"))) {
@@ -191,602 +449,5 @@ public class TerrorZoneHandler {
 			return 1;
 		}
 		return 0;
-	}
-
-	public void applyTerrorZone(TerrorZone selection, int charlevel) {
-		if (selection == TerrorZone.TRAVINCAL || selection == TerrorZone.DURANCE_OF_HATE) {
-			this.adjustCouncilTC();
-		}
-		String[] monsterSpawns = this.gatherMonsters(selection);
-		this.desecrateMonsters(monsterSpawns, charlevel);
-		this.adjustAreaLevels(selection.getLevelLines(), charlevel);
-		this.unlinkPresets(selection.getPresetMonsters());
-		this.handleSpecialMonsters(selection.getSpecialCases(), charlevel);
-	}
-
-	private void unlinkPresets(String[] presetMonsters) {
-		for (String monster : presetMonsters) {
-			int monsterID = monstersLookup.get(monster);
-			monsters.get(monsterID)[3] = "";
-		}	
-	}
-
-	private void handleSpecialMonsters(SpecialMonster[] specialMonsters, int charlevel) {
-		for (SpecialMonster specialMonster : specialMonsters) {
-			if (this.superuniquesLookup.containsKey(specialMonster.toString())) {
-				int superuniqueIndex = this.superuniquesLookup.get(specialMonster.toString());
-				String[] superuniqueLines = this.superuniques.get(superuniqueIndex);
-				if (this.monsterIsBoss(superuniqueLines[2])) {
-					superuniqueLines[1] += "Terror";
-					this.setBossTC(specialMonster, superuniqueLines[2], charlevel);
-					continue;
-				}
-				switch (specialMonster) {
-				case ISMAIL:
-				case BREMM:
-					this.adjustCouncilTC();
-				default:
-					superuniqueLines[1] += "Terror";
-					if (specialMonster.hasSpecialTC()) {
-						String tcSuffix = " Desecrated";
-						if (specialMonster != SpecialMonster.NIHLATHAK) {
-							tcSuffix += " A";
-						}
-						superuniqueLines[17] += tcSuffix;
-						superuniqueLines[18] += tcSuffix;
-						superuniqueLines[19] += tcSuffix;
-					}
-				}
-			} else {
-				this.desecrateMonster(specialMonster.toString(), charlevel);
-				this.setBossTC(specialMonster, specialMonster.toString(), charlevel);
-			}
-		}
-	}
-
-	private void setBossTC(SpecialMonster boss, String monsterID, int charlevel) {
-		switch (boss) {
-		case ANDARIEL:
-		case BAAL:
-		case BLOODRAVEN:
-		case DIABLO:
-		case DURIEL:
-		case IZUAL:
-		case MEPHISTO:
-		case SUMMONER:
-			String[] monsterLines = monsters.get(monstersLookup.get(monsterID));
-			monsterLines[236] += this.getBossTCSuffix(boss, 0, charlevel + 5);
-			monsterLines[237] = monsterLines[236];
-			monsterLines[238] = monsterLines[236];
-			monsterLines[239] = monsterLines[236];
-			monsterLines[240] += this.getBossTCSuffix(boss, 1, charlevel + 5);
-			monsterLines[241] = monsterLines[240];
-			monsterLines[242] = monsterLines[240];
-			monsterLines[243] = monsterLines[240];
-			monsterLines[244] += this.getBossTCSuffix(boss, 2, charlevel + 5);
-			monsterLines[245] = monsterLines[244];
-			monsterLines[246] = monsterLines[244];
-			monsterLines[247] = monsterLines[244];
-			break;
-		case GRISWOLD:
-		case NIHLATHAK:
-		case RADAMENT:
-			String[] superuniqueLines = superuniques.get(superuniquesLookup.get(boss.toString()));
-			superuniqueLines[17] += this.getBossTCSuffix(boss, 0, charlevel + 5);
-			superuniqueLines[18] += this.getBossTCSuffix(boss, 1, charlevel + 5);
-			superuniqueLines[19] += this.getBossTCSuffix(boss, 2, charlevel + 5);
-			break;
-		default:
-			System.err.println("default case for setBossTC should never happen! Boss: " + boss.toString());
-		}
-	}
-
-	private String getBossTCSuffix(SpecialMonster boss, int difficulty, int bosslevel) {
-		switch (boss) {
-		case SUMMONER:
-			return this.getSummonerTCSuffix(difficulty, bosslevel);
-		case RADAMENT:
-			return this.getRadamentTCSuffix(difficulty, bosslevel);
-		case GRISWOLD:
-			return this.getGriswoldTCSuffix(difficulty, bosslevel);
-		case BLOODRAVEN:
-			return this.getBloodRavenTCSuffix(difficulty, bosslevel);
-		case ANDARIEL:
-			return this.getAndarielTCSuffix(difficulty, bosslevel);
-		case DURIEL:
-			return this.getDurielTCSuffix(difficulty, bosslevel);
-		case MEPHISTO:
-			return this.getMephistoTCSuffix(difficulty, bosslevel);
-		case DIABLO:
-			return this.getDiabloTCSuffix(difficulty, bosslevel);
-		case IZUAL:
-			return this.getIzualTCSuffic(difficulty, bosslevel);
-		default:
-			return " Desecrated";
-		}
-	}
-
-	private boolean monsterIsBoss(String monsterID) {
-		String[] monsterLines = monsters.get(monstersLookup.get(monsterID));
-		return !monsterLines[87].isEmpty();
-	}
-
-	private String getSummonerTCSuffix(int difficulty, int bosslevel) {
-		switch (difficulty) {
-		case 0:
-			if (bosslevel < 32) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 48) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 1:
-			if (bosslevel < 63) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 73) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 2:
-			if (bosslevel < 84) {
-				return " Desecrated A";
-			}
-			if (bosslevel < 87) {
-				return " Desecrated B";
-			}
-			if (bosslevel < 90) {
-				return " Desecrated C";
-			}
-			if (bosslevel < 93) {
-				return " Desecrated D";
-			}
-			if (bosslevel >= 96) {
-				return " Desecrated F";
-			}
-			return " Desecrated E";
-		}
-		return null;
-	}
-
-	private String getRadamentTCSuffix(int difficulty, int bosslevel) {
-		switch (difficulty) {
-		case 0:
-			if (bosslevel < 33) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 48) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 1:
-			if (bosslevel < 62) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 73) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 2:
-			if (bosslevel < 90) {
-				return " Desecrated A";
-			}
-			if (bosslevel < 93) {
-				return " Desecrated B";
-			}
-			if (bosslevel >= 96) {
-				return " Desecrated D";
-			}
-			return " Desecrated C";
-		}
-		return null;
-	}
-
-	private String getGriswoldTCSuffix(int difficulty, int bosslevel) {
-		switch (difficulty) {
-		case 0:
-			if (bosslevel < 29) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 48) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 1:
-			if (bosslevel < 57) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 73) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 2:
-			if (bosslevel < 90) {
-				return " Desecrated A";
-			}
-			if (bosslevel < 93) {
-				return " Desecrated B";
-			}
-			if (bosslevel >= 96) {
-				return " Desecrated D";
-			}
-			return " Desecrated C";
-		}
-		return null;
-	}
-
-	private String getIzualTCSuffic(int difficulty, int bosslevel) {
-		switch (difficulty) {
-		case 0:
-			if (bosslevel < 38) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 48) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 1:
-			if (bosslevel < 66) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 73) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 2:
-			if (bosslevel < 90) {
-				return " Desecrated A";
-			}
-			if (bosslevel < 93) {
-				return " Desecrated B";
-			}
-			if (bosslevel >= 96) {
-				return " Desecrated D";
-			}
-			return " Desecrated C";
-		}
-		return null;
-	}
-
-	private String getDiabloTCSuffix(int difficulty, int bosslevel) {
-		switch (difficulty) {
-		case 0:
-			if (bosslevel >= 48) {
-				return " Desecrated B";
-			}
-			return " Desecrated A";
-		case 1:
-			if (bosslevel < 67) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 73) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 2:
-			if (bosslevel >= 96) {
-				return " Desecrated B";
-			}
-			return " Desecrated A";
-		}
-		return null;
-	}
-
-	private String getMephistoTCSuffix(int difficulty, int bosslevel) {
-		switch (difficulty) {
-		case 0:
-			if (bosslevel < 38) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 48) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 1:
-			if (bosslevel < 66) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 73) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 2:
-			if (bosslevel < 90) {
-				return " Desecrated A";
-			}
-			if (bosslevel < 93) {
-				return " Desecrated B";
-			}
-			if (bosslevel >= 96) {
-				return " Desecrated D";
-			}
-			return " Desecrated C";
-		}
-		return null;
-	}
-
-	private String getDurielTCSuffix(int difficulty, int bosslevel) {
-		switch (difficulty) {
-		case 0:
-			if (bosslevel < 36) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 48) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 1:
-			if (bosslevel < 63) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 73) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 2:
-			if (bosslevel < 90) {
-				return " Desecrated A";
-			}
-			if (bosslevel < 93) {
-				return " Desecrated B";
-			}
-			if (bosslevel >= 96) {
-				return " Desecrated D";
-			}
-			return " Desecrated C";
-		}
-		return null;
-	}
-
-	private String getAndarielTCSuffix(int difficulty, int bosslevel) {
-		switch (difficulty) {
-		case 0:
-			if (bosslevel < 32) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 48) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 1:
-			if (bosslevel < 57) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 73) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 2:
-			if (bosslevel < 78) {
-				return " Desecrated A";
-			}
-			if (bosslevel < 81) {
-				return " Desecrated B";
-			}
-			if (bosslevel < 84) {
-				return " Desecrated C";
-			}
-			if (bosslevel < 87) {
-				return " Desecrated D";
-			}
-			if (bosslevel < 90) {
-				return " Desecrated E";
-			}
-			if (bosslevel < 93) {
-				return " Desecrated F";
-			}
-			if (bosslevel >= 96) {
-				return " Desecrated H";
-			}
-			return " Desecrated G";
-		}
-		return null;
-	}
-
-	private String getBloodRavenTCSuffix(int difficulty, int bosslevel) {
-		switch (difficulty) {
-		case 0:
-			if (bosslevel < 29) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 48) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 1:
-			if (bosslevel < 57) {
-				return " Desecrated A";
-			}
-			if (bosslevel >= 73) {
-				return " Desecrated C";
-			}
-			return " Desecrated B";
-		case 2:
-			if (bosslevel < 90) {
-				return " Desecrated A";
-			}
-			if (bosslevel < 93) {
-				return " Desecrated B";
-			}
-			if (bosslevel >= 96) {
-				return " Desecrated D";
-			}
-			return " Desecrated C";
-		}
-		return null;
-	}
-
-	private void adjustCouncilTC() {
-		String suffix = " Desecrated A";
-		int firstID = monstersLookup.get("councilmember1");
-		String[] first = monsters.get(firstID);
-		int secondID = monstersLookup.get("councilmember2");
-		String[] second = monsters.get(secondID);
-		int lastID = monstersLookup.get("councilmember3");
-		String[] last = monsters.get(lastID);
-		for (int index = 236; index < 247; index++) {
-			if (!first[index].contains("Desecrated")) {
-				first[index] += suffix;
-			}
-			if (!second[index].contains("Desecrated")) {
-				second[index] += suffix;
-			}
-			if (!last[index].contains("Desecrated")) {
-				last[index] += suffix;
-			}
-			if (index == 238 || index == 242) {
-				index++;
-			}
-		}
-	}
-
-	public boolean isStringInArray(String str, String[] array) {
-		for (String element : array) {
-			if (element.equals(str)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void adjustAreaLevels(int[] levelLines, int charlevel) {
-		for (int area : levelLines) {
-			// max alvls are 45, 71 and 96
-			String[] levelLine = this.levels.get(area);
-			levelLine[59] = Integer.toString(Math.max(Math.min(45, charlevel + 2), Integer.parseInt(levelLine[59])));
-			levelLine[60] = Integer.toString(Math.max(Math.min(71, charlevel + 2), Integer.parseInt(levelLine[60])));
-			levelLine[61] = Integer.toString(Math.max(Math.min(96, charlevel + 2), Integer.parseInt(levelLine[61])));
-		}
-	}
-
-	private void desecrateMonsters(String[] monsterStrings, int charlevel) {
-		for (String monster : monsterStrings) {
-			this.desecrateMonster(monster, charlevel);
-		}
-	}
-
-	private void desecrateMonster(String monster, int charlevel) {
-		int monsterID = this.monstersLookup.get(monster);
-		String[] monsterLine = this.monsters.get(monsterID);
-		// change name
-		if (monsterLine[5].endsWith("Terror")) {
-			return;
-		}
-		monsterLine[5] += "Terror";
-		// change level
-		if (!monsterLine[87].isEmpty()) {
-			monsterLine[31] = Integer
-					.toString(Math.max(Math.min(48, charlevel + 5), Integer.parseInt(monsterLine[31])));
-			monsterLine[32] = Integer
-					.toString(Math.max(Math.min(74, charlevel + 5), Integer.parseInt(monsterLine[32])));
-			monsterLine[33] = Integer
-					.toString(Math.max(Math.min(99, charlevel + 5), Integer.parseInt(monsterLine[33])));
-		} else {
-			monsterLine[31] = Integer
-					.toString(Math.max(Math.min(45, charlevel + 2), Integer.parseInt(monsterLine[31])));
-			monsterLine[32] = Integer
-					.toString(Math.max(Math.min(71, charlevel + 2), Integer.parseInt(monsterLine[32])));
-			monsterLine[33] = Integer
-					.toString(Math.max(Math.min(96, charlevel + 2), Integer.parseInt(monsterLine[33])));
-		}
-		// adjust xp
-		monsterLine[158] = Integer.toString((int) (Integer.parseInt(monsterLine[158]) * 1.25));
-		monsterLine[171] = Integer.toString((int) (Integer.parseInt(monsterLine[171]) * 1.25));
-		monsterLine[184] = Integer.toString((int) (Integer.parseInt(monsterLine[184]) * 1.25));
-		// TCs are handled in the special cases
-	}
-
-	public void applyChaos(int charlevel) {
-		Set<String> monsterStrings = new HashSet<String>();
-		Set<SpecialMonster> specialEntries = new HashSet<SpecialMonster>();
-		Set<Integer> levelsSet = new HashSet<Integer>();
-		Set<String> presetMonsters = new HashSet<String>();
-		for (TerrorZone tz : TerrorZone.values()) {
-			if (tz == TerrorZone.RANDOM) {
-				continue;
-			}
-			monsterStrings.addAll(Arrays.asList(this.gatherMonsters(tz)));
-			specialEntries.addAll(Arrays.asList(tz.getSpecialCases()));
-			presetMonsters.addAll(Arrays.asList(tz.getPresetMonsters()));
-			for (int level : tz.getLevelLines()) {
-				levelsSet.add(level);
-			}
-		}
-		String[] monsterArray = new String[monsterStrings.size()];
-		int i = 0;
-		for (String s : monsterStrings) {
-			monsterArray[i++] = s;
-		}
-		SpecialMonster[] specialArray = new SpecialMonster[specialEntries.size()];
-		i = 0;
-		for (SpecialMonster s : specialEntries) {
-			specialArray[i++] = s;
-		}
-		int[] levelsArray = new int[levelsSet.size()];
-		i = 0;
-		for (int s : levelsSet) {
-			levelsArray[i++] = s;
-		}
-		String[] presetArray = new String[presetMonsters.size()];
-		i = 0;
-		for (String s : presetMonsters) {
-			presetArray[i++] = s;
-		}
-		this.desecrateMonsters(monsterArray, charlevel);
-		this.unlinkPresets(presetArray);
-		this.handleSpecialMonsters(specialArray, charlevel);
-		this.adjustAreaLevels(levelsArray, charlevel);
-	}
-
-	private String[] gatherMonsters(TerrorZone tz) {
-		List<String> presets = Arrays.asList(tz.getPresetMonsters()); 
-		Set<String> monstersSet = new HashSet<String>(presets);
-		
-		for (int level : tz.getLevelLines()) {
-			for (int i = 74; i < 105; i++) {
-				if (i == 84) {
-					continue;
-				}
-				if (!levels.get(level)[i].isEmpty()) {
-					monstersSet.add(levels.get(level)[i]);
-				}
-			}
-		}
-		for (SpecialMonster special : tz.getSpecialCases()) {
-			if (superuniquesLookup.containsKey(special.toString())) {
-				String superuniqueID = superuniques.get(superuniquesLookup.get(special.toString()))[2];
-				monstersSet.add(superuniqueID);
-			} else {
-				monstersSet.add(special.toString());
-			}
-		}
-		Set<String> minions = new HashSet<String>();
-		
-		do {
-			minions.clear();
-			for (String monster : monstersSet) {
-				String spawn = monsters.get(monstersLookup.get(monster))[15];
-				String minion1 = monsters.get(monstersLookup.get(monster))[19];
-				String minion2 = monsters.get(monstersLookup.get(monster))[20];
-				if (!spawn.isEmpty() && !monstersSet.contains(spawn)) {
-					minions.add(spawn);
-				}
-				if (!minion1.isEmpty() && !monstersSet.contains(minion1)) {
-					minions.add(minion1);
-				}
-				if (!minion2.isEmpty() && !monstersSet.contains(minion2)) {
-					minions.add(minion2);
-				}
-			}
-			monstersSet.addAll(minions);
-		}
-		while (!minions.isEmpty());
-		String[] ret = new String[monstersSet.size()];
-		int index = 0;
-		for (String monster : monstersSet) {
-			ret[index++] = monster;
-		}
-		return ret;
 	}
 }
