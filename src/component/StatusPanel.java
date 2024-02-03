@@ -1,7 +1,12 @@
 package component;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Graphics;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URI;
+
 import javax.swing.JPanel;
 
 public class StatusPanel extends JPanel {
@@ -11,6 +16,18 @@ public class StatusPanel extends JPanel {
 
 	public StatusPanel() {
 		super();
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					try {
+						Desktop.getDesktop().browse(new URI("https://www.d2emu.com/tz-sp"));
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+		});
 	}
 
 	public void declareWorking() {
