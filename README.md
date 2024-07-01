@@ -7,6 +7,17 @@ Simulates the Terror Zones introduced in D2R. It's not a perfect replica, but as
 
 Bosses and uniques do not get the (Desecrated) suffix behind their name. That is a limitation by how they are spawned and to change their name would require a fair amount of hardcoding.
 
+Just extract the zip file to any folder (I recommend not using your Diablo II install folder) and double-click the jar to run it. Make sure the OriginalFiles folder is in the same directory as the jar.
+
+The TOTAL CHAOS button simply terrorizes every TZ area at the same time, if you are too lazy to switch all the time.
+
+Reset removes all active TZs.
+
+The (initially) grey dot is a status indicator. If you select a zone to be terrorized or press the TOTAL CHAOS button, it will turn red if something went wrong and turn green when everything is ok. Double-clicking the area around the status indicator will open up the [TZ calendar.](https://www.d2emu.com/tz-sp)
+
+Known wont-fix:
+TZs only work in Nightmare and Hell. The reason for this is that changing mlvls for monsters in Normal mode breaks preset monsters on all difficulties, so I had to make amends.
+
 ## Many D2R changes ported to LoD
 
 I ported most of the balance changes from D2R in the mod. Pretty much all I could do without hardcoding.
