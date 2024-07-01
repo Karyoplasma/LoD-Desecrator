@@ -29,11 +29,14 @@ Here is a rather incomplete list of stuff that is not changed due to mod limitat
 + Mana burn fix
 + Sunders
 
-All of the above require hard coding, this mod is soft-code only.
+All of the above require hardcoding, this mod is soft-code only.
+
+### Install/Uninstall
 
 To install: drag the Data folder in the mod.zip into your Diablo 2 install folder. Add -direct -txt to the starting parameters (either in the PlugY.ini or in your shortcut).
+
 To uninstall: delete the Data folder from your Diablo 2 install folder. Remove -direct -txt starting parameters.
 
 ## Link to latest release
 
-Update here
+https://github.com/Karyoplasma/LoD-Desecrator/releases/latest
