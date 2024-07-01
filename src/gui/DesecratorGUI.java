@@ -1,13 +1,10 @@
 package gui;
 
-import java.awt.Component;
 import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import net.miginfocom.swing.MigLayout;
 import java.awt.Font;
 import java.nio.file.Path;
-
 import javax.swing.JButton;
 import actions.ResetButtonAction;
 import component.StatusPanel;

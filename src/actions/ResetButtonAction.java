@@ -18,6 +18,7 @@ public class ResetButtonAction extends AbstractAction {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		TerrorZoneHandler.modPath = gui.getModPath();
 		gui.getStatusPanel().declareWorking();
 		int errorLevel = TerrorZoneHandler.resetTerrorZones();
 		gui.getStatusPanel().setStatusColor(errorLevel);

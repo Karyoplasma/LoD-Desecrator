@@ -21,7 +21,8 @@ public class TerrorZoneHandler {
 	private static TerrorZoneHandler INSTANCE;
 	private Map<Integer, String[]> monsters, superuniques, levels;
 	private Map<String, Integer> monstersLookup, superuniquesLookup;
-
+	public static Path modPath;
+	
 	private TerrorZoneHandler() {
 		this.monsters = this.readMonstersFromOriginal();
 		this.superuniques = this.readSuperUniquesFromOriginal();
@@ -371,8 +372,9 @@ public class TerrorZoneHandler {
 
 	private int writeSuperUniques() {
 		StringBuilder builder = new StringBuilder();
+		Path superuniquesPath = modPath.resolve("SuperUniques.txt");
 		try (BufferedWriter writer = new BufferedWriter(
-				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\SuperUniques.txt"))) {
+				new FileWriter(superuniquesPath.toFile()))) {
 			for (int i = 0; i < this.superuniques.size(); i++) {
 				builder.setLength(0);
 				String[] temp = this.superuniques.get(i);
@@ -392,8 +394,10 @@ public class TerrorZoneHandler {
 
 	private int writeMonstats() {
 		StringBuilder builder = new StringBuilder();
+		Path monstatsPath = modPath.resolve("monstats.txt");
+		
 		try (BufferedWriter writer = new BufferedWriter(
-				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\monstats.txt"))) {
+				new FileWriter(monstatsPath.toFile()))) {
 			for (int i = 0; i < this.monsters.size(); i++) {
 				builder.setLength(0);
 				String[] temp = this.monsters.get(i);
@@ -413,8 +417,10 @@ public class TerrorZoneHandler {
 
 	private int writeLevels() {
 		StringBuilder builder = new StringBuilder();
+		Path levelsPath = modPath.resolve("Levels.txt");
+		
 		try (BufferedWriter writer = new BufferedWriter(
-				new FileWriter("D:\\Games\\Diablo II\\Data\\Global\\Excel\\Levels.txt"))) {
+				new FileWriter(levelsPath.toFile()))) {
 			for (int i = 0; i < this.levels.size(); i++) {
 				builder.setLength(0);
 				String[] temp = this.levels.get(i);
@@ -434,11 +440,11 @@ public class TerrorZoneHandler {
 
 	public static int resetTerrorZones() {
 		Path superuniquesFile = Paths.get("OriginalFiles\\SuperUniques.txt");
-		Path superuniquesPath = Paths.get("D:\\Games\\Diablo II\\Data\\Global\\Excel\\SuperUniques.txt");
+		Path superuniquesPath = modPath.resolve("SuperUniques.txt");
 		Path monstatsFile = Paths.get("OriginalFiles\\monstats.txt");
-		Path monstatsPath = Paths.get("D:\\Games\\Diablo II\\Data\\Global\\Excel\\monstats.txt");
+		Path monstatsPath = modPath.resolve("monstats.txt");
 		Path levelsFile = Paths.get("OriginalFiles\\Levels.txt");
-		Path levelsPath = Paths.get("D:\\Games\\Diablo II\\Data\\Global\\Excel\\Levels.txt");
+		Path levelsPath = modPath.resolve("Levels.txt");
 		try {
 			Files.copy(superuniquesFile, superuniquesPath, StandardCopyOption.REPLACE_EXISTING);
 			Files.copy(monstatsFile, monstatsPath, StandardCopyOption.REPLACE_EXISTING);

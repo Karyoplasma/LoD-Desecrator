@@ -30,6 +30,7 @@ public class GenerateButtonAction extends AbstractAction {
 			return;
 		}
 		TerrorZoneHandler handler = TerrorZoneHandler.getInstance();
+		TerrorZoneHandler.modPath = gui.getModPath();
 		if (selection == TerrorZone.RANDOM) {
 			List<TerrorZone> possibleZones = new ArrayList<TerrorZone>();
 			possibleZones.addAll(Arrays.asList(TerrorZone.values()));

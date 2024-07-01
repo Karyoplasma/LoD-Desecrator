@@ -22,6 +22,7 @@ public class ChaosButtonAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 		gui.getStatusPanel().declareWorking();
 		TerrorZoneHandler handler = TerrorZoneHandler.getInstance();
+		TerrorZoneHandler.modPath = gui.getModPath();
 		handler.applyChaos(gui.getCharLevel());
 		int errorLevel = handler.writeChanges();
 		gui.getStatusPanel().setStatusColor(errorLevel);
