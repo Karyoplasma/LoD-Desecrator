@@ -39,6 +39,7 @@ Here is a rather incomplete list of stuff that is not changed due to mod limitat
 + Assassin traps benefitting from -%res (I told them to do that, but haven't tested it)
 + Mana burn fix
 + Sunders
++ Merc equips (horrible hardcoded mess)
 
 All of the above require hardcoding, this mod is soft-code only.
 
