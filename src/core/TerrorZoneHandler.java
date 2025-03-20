@@ -296,7 +296,7 @@ public class TerrorZoneHandler {
 	
 	private Map<Integer, String[]> readLevelsFromOriginal() {
 		Map<Integer, String[]> levels = new HashMap<Integer, String[]>();
-		try (BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles\\Levels.txt"))) {
+		try (BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles/Levels.txt"))) {
 			String in = reader.readLine();
 			int lineNumber = 1;
 			levels.put(0, in.split("\\t"));
@@ -315,7 +315,7 @@ public class TerrorZoneHandler {
 	private Map<Integer, String[]> readSuperUniquesFromOriginal() {
 		Map<Integer, String[]> superuniques = new HashMap<Integer, String[]>();
 		this.superuniquesLookup = new HashMap<String, Integer>();
-		try (BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles\\SuperUniques.txt"))) {
+		try (BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles/SuperUniques.txt"))) {
 			String in = reader.readLine();
 			int lineNumber = 1;
 			superuniques.put(0, in.split("\\t"));
@@ -335,7 +335,7 @@ public class TerrorZoneHandler {
 	private Map<Integer, String[]> readMonstersFromOriginal() {
 		Map<Integer, String[]> monsters = new HashMap<Integer, String[]>();
 		this.monstersLookup = new HashMap<String, Integer>();
-		try (BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles\\monstats.txt"))) {
+		try (BufferedReader reader = new BufferedReader(new FileReader("OriginalFiles/monstats.txt"))) {
 			String in = reader.readLine();
 			int lineNumber = 1;
 			monsters.put(0, in.split("\\t"));
@@ -439,11 +439,11 @@ public class TerrorZoneHandler {
 	}
 
 	public static int resetTerrorZones() {
-		Path superuniquesFile = Paths.get("OriginalFiles\\SuperUniques.txt");
+		Path superuniquesFile = Paths.get("OriginalFiles/SuperUniques.txt");
 		Path superuniquesPath = modPath.resolve("SuperUniques.txt");
-		Path monstatsFile = Paths.get("OriginalFiles\\monstats.txt");
+		Path monstatsFile = Paths.get("OriginalFiles/monstats.txt");
 		Path monstatsPath = modPath.resolve("monstats.txt");
-		Path levelsFile = Paths.get("OriginalFiles\\Levels.txt");
+		Path levelsFile = Paths.get("OriginalFiles/Levels.txt");
 		Path levelsPath = modPath.resolve("Levels.txt");
 		try {
 			Files.copy(superuniquesFile, superuniquesPath, StandardCopyOption.REPLACE_EXISTING);
