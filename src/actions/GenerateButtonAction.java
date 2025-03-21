@@ -38,8 +38,13 @@ public class GenerateButtonAction extends AbstractAction {
 			Collections.shuffle(possibleZones);
 			selection = possibleZones.get(0);
 		}
-
-		handler.applyTerrorZone(selection, gui.getCharLevel());
+		try {
+			handler.applyTerrorZone(selection, gui.getCharLevel());
+		} catch (NullPointerException ex) {
+			gui.getStatusPanel().setStatusColor(1);
+			gui.repaintComboBox();
+			return;
+		}		
 		int errorLevel = handler.writeChanges();
 		gui.getStatusPanel().setStatusColor(errorLevel);
 		gui.getComboBoxTerrorZone().setSelectedIndex(selection.ordinal());

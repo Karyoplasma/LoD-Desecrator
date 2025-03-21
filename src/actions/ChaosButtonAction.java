@@ -23,7 +23,12 @@ public class ChaosButtonAction extends AbstractAction {
 		gui.getStatusPanel().declareWorking();
 		TerrorZoneHandler handler = TerrorZoneHandler.getInstance();
 		TerrorZoneHandler.modPath = gui.getModPath();
-		handler.applyChaos(gui.getCharLevel());
+		try {
+			handler.applyChaos(gui.getCharLevel());
+		} catch (NullPointerException ex) {
+			gui.getStatusPanel().setStatusColor(1);
+			return;
+		}
 		int errorLevel = handler.writeChanges();
 		gui.getStatusPanel().setStatusColor(errorLevel);
 		gui.getComboBoxTerrorZone().setSelectedIndex(-1);

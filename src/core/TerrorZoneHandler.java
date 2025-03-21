@@ -31,7 +31,12 @@ public class TerrorZoneHandler {
 
 	public static TerrorZoneHandler getInstance() {
 		if (INSTANCE == null) {
-			INSTANCE = new TerrorZoneHandler();
+			TerrorZoneHandler tempInstance = new TerrorZoneHandler();
+	        if (tempInstance.monsters == null || tempInstance.superuniques == null || tempInstance.levels == null) {
+	        	System.err.println("TerrorZoneHandler failed to initialize. Check your files.");
+	            return null;
+	        }
+			INSTANCE = tempInstance;
 		}
 		return INSTANCE;
 	}
