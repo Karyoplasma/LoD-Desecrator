@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -204,9 +203,7 @@ public class TerrorZoneHandler {
 	}
 
 	private String[] gatherMonsters(TerrorZone tz) {
-		List<String> presets = Arrays.asList(tz.getPresetMonsters());
-		Set<String> monstersSet = new HashSet<String>(presets);
-
+		Set<String> monstersSet = new HashSet<String>(Arrays.asList(tz.getPresetMonsters()));
 		for (int level : tz.getLevelLines()) {
 			for (int i = 74; i < 105; i++) {
 				if (i == 84) {
@@ -247,12 +244,8 @@ public class TerrorZoneHandler {
 			monstersSet.addAll(minions);
 		} while (!minions.isEmpty());
 		monstersSet.remove("baaltaunt");
-		String[] ret = new String[monstersSet.size()];
-		int index = 0;
-		for (String monster : monstersSet) {
-			ret[index++] = monster;
-		}
-		return ret;
+		
+		return monstersSet.toArray(new String[0]);
 	}
 
 	private void resetChanges() {

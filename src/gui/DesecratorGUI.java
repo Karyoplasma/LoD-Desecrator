@@ -160,7 +160,7 @@ public class DesecratorGUI {
 
 	public void showOriginalFilesMissingError() {
 		JOptionPane.showMessageDialog(frmDesecrator,
-				"Original files could not be loaded!\n\nMake sure these 3 files are in the OriginalFiles folder:\nmonstats.txt\nSuperUniques.txt\nLevels.txt",
+				"Original files could not be loaded!\n\nMake sure these 3 files are in the OriginalFiles folder:\nmonstats.txt\nSuperUniques.txt\nLevels.txt\n\nFile names are case-sensitive on Linux",
 				"Critical Error", JOptionPane.ERROR_MESSAGE);
 	}
 }
