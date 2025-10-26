@@ -29,8 +29,14 @@ public class GenerateButtonAction extends AbstractAction {
 			gui.getStatusPanel().setStatusColor(2);
 			return;
 		}
-		TerrorZoneHandler handler = TerrorZoneHandler.getInstance();
-		TerrorZoneHandler.modPath = gui.getModPath();
+		TerrorZoneHandler handler;
+		try {
+			handler = new TerrorZoneHandler();
+		} catch (IllegalStateException critical) {
+			gui.getStatusPanel().setStatusColor(1);
+			gui.showOriginalFilesMissingError();
+			return;
+		}
 		if (selection == TerrorZone.RANDOM) {
 			List<TerrorZone> possibleZones = new ArrayList<TerrorZone>();
 			possibleZones.addAll(Arrays.asList(TerrorZone.values()));
@@ -44,12 +50,11 @@ public class GenerateButtonAction extends AbstractAction {
 			gui.getStatusPanel().setStatusColor(1);
 			gui.repaintComboBox();
 			return;
-		}		
-		int errorLevel = handler.writeChanges();
+		}
+		int errorLevel = handler.writeChanges(gui.getModPath());
 		gui.getStatusPanel().setStatusColor(errorLevel);
 		gui.getComboBoxTerrorZone().setSelectedIndex(selection.ordinal());
 		gui.repaintComboBox();
-
 	}
 
 }

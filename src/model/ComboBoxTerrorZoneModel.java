@@ -1,6 +1,5 @@
 package model;
 
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,11 +13,11 @@ public class ComboBoxTerrorZoneModel extends AbstractListModel<TerrorZone> imple
 	private static final long serialVersionUID = -4893105985912964848L;
 	private List<TerrorZone> zones;
 	private TerrorZone selected;
-	
+
 	public ComboBoxTerrorZoneModel() {
 		this.zones = Arrays.asList(TerrorZone.values());
 	}
-	
+
 	@Override
 	public int getSize() {
 		return zones.size();

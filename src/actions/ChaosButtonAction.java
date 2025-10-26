@@ -21,15 +21,22 @@ public class ChaosButtonAction extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		gui.getStatusPanel().declareWorking();
-		TerrorZoneHandler handler = TerrorZoneHandler.getInstance();
-		TerrorZoneHandler.modPath = gui.getModPath();
+		TerrorZoneHandler handler;
+		try {
+			handler = new TerrorZoneHandler();
+		} catch (IllegalStateException critical) {
+			gui.getStatusPanel().setStatusColor(1);
+			gui.showOriginalFilesMissingError();
+			return;
+		}
 		try {
 			handler.applyChaos(gui.getCharLevel());
 		} catch (NullPointerException ex) {
-			gui.getStatusPanel().setStatusColor(1);
+
+			ex.printStackTrace();
 			return;
 		}
-		int errorLevel = handler.writeChanges();
+		int errorLevel = handler.writeChanges(gui.getModPath());
 		gui.getStatusPanel().setStatusColor(errorLevel);
 		gui.getComboBoxTerrorZone().setSelectedIndex(-1);
 		gui.repaintComboBox();
