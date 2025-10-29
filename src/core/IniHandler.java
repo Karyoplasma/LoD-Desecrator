@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 
 public class IniHandler {
 	
@@ -40,7 +39,7 @@ public class IniHandler {
 	        }
 	        File iniFile = new File("Desecrator.ini");
 
-	        try (BufferedWriter writer = Files.newBufferedWriter(iniFile.toPath(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+	        try (BufferedWriter writer = Files.newBufferedWriter(iniFile.toPath())) {
 	            writer.write("ModPath=" + modPath.toString());
 	        } catch (IOException e) {
 	            e.printStackTrace();
