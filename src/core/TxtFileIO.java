@@ -47,7 +47,7 @@ public class TxtFileIO {
 	            String[] temp = originals.get(i);
 	            temp = changed.getOrDefault(temp[0], temp);
 	            writer.write(String.join("\t", temp));
-	            writer.newLine();
+	            writer.write("\r\n");
 	        }
 	    } catch (IOException e) {
 	        e.printStackTrace();
